@@ -31,6 +31,7 @@ def main():
     # predict(df_scaled_download, df_scaled_upload, df_scaled_merged)
 
     # return df_scaled_downloads, df_scaled_uploads, df_scaled_merged
+#zmiana
 
 if __name__ == "__main__":
     main()
