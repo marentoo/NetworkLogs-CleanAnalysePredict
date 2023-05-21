@@ -1,9 +1,4 @@
-#datasets
-RIPE-Atlas.csv
-RIPE-Atlas.xlsx
-RIPE-Atlas-measurement-50728410.json
-
-#files
+#folders
 analysis/
 evaluation/
 
