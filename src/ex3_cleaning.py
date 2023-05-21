@@ -4,7 +4,6 @@ import os
 ##Cleaning data
 #------------------------------------------------------------------------------------
         ##check duplicates and ##Checking percentage of duplicates and ##Removing all duplicates
-
 def clean_dupl(df, df_name):
 
     duplicate_rows = df[df.duplicated()]
@@ -19,8 +18,7 @@ def clean_dupl(df, df_name):
 
 #------------------------------------------------------------------------------------
         ##Checking for missing data and Handle missing data - no missing data! but if ... then:
-
-def clean_miss(df,df_name):
+def clean_miss(df, df_name):
     #check if any NaN
     sNaN = df.isnull().values.any()
     print("\n",f"Any missing data - {df_name}?: {sNaN}")
@@ -29,35 +27,49 @@ def clean_miss(df,df_name):
     missing_values_count = df.isnull().sum()
     print(f"Missing data count:\n{missing_values_count}\n")
 
-    #Handle NaN
-    df['result'].fillna('success', inplace = True)
-    df.dropna(subset = ['rt'], inplace = True)
-    df.dropna(subset = ['from'], inplace = True)
-    print('Handling missing data!!!',"\n")
+    ##Handle NaN
+    df['err'].fillna('no_error', inplace = True)
 
-    missing_values_count = df.isnull().sum()
-    print("\n",f"Missing data count:\n{missing_values_count}\n")
+    #I approach - droping
+    # df.dropna(subset = ['rt'], inplace = True)
+    # df.dropna(subset = ['from'], inplace = True)
+    # df.dropna(subset = ['mver'], inplace = True)
+    
+    #II approach - imputating
+    df['ver'] = df['ver'].fillna('NaN')
+    df['mver'] = df['mver'].fillna('NaN')
+    df['rt'] = df['rt'].fillna(0).astype(float)
+    df['res'] = df['res'].fillna(0).astype(int)
+    df['hsize'] = df['hsize'].fillna(0).astype(int)
+    df['bsize'] = df['bsize'].fillna(0).astype(int)
+    df['src_addr'] = df['src_addr'].fillna('NaN')
+    
+    print('Handling missing data!!!',"\n")
 
     return df
 
 
 #------------------------------------------------------------------------------------
         ##Detect outliers -  Define z_score for checking outliers and Percentage of outliers in whole dataset:
-
 def detect_outliers(df, df_name):
     z_scores = np.abs((df - df.mean(numeric_only=True)) / df.std(numeric_only=True))
-    outliers = df[(z_scores > 4).any(axis=1)]
+    outliers = df[(z_scores > 5).any(axis=1)]
     print(f'No. of outliers - {df_name}: {len(outliers.index)}')
     percout = int((len(outliers.index)*100)/len(df.index))
     print(f' outliers percentage- {df_name}: {percout} %\n')
-    return df
 
-#------------------------------------------------------------------------------------
-       ##Handling outliers <-- Drop outliers from the dataframes #<<-dziala ale zle <<--- pytanie gdzie umieścic
-## df_downloads = df_downloads.drop(outliersD.index,)
-## df_uploads = df_uploads.drop(outliersU.index)
-## print("\n","Droping outliers!","\n")
-## print(f'Rd:{len(df_downloads.index)}');print(f'Ru:{len(df_uploads.index)}')
+    # Print the attributes considered for outlier detection
+    attributes = z_scores.columns[(z_scores > 5).any(axis=0)]
+    print('Attributes considered for outlier detection:')
+    print(attributes)
+
+    # #Handling outliers
+    # df = df.drop(outliers.index)  # Drop the rows with outliers
+    # outliers.to_csv('analysis/outliers_dropped.csv', index=False)  # Save the cleaned DataFrame to a CSV file
+
+    # print("Dropping outliers!\n")
+    # print(f'Remaining rows: {len(df.index)}')
+    return df
 
 #------------------------------------------------------------------------------------
         ##final function
@@ -71,6 +83,16 @@ def clean_df(df, df_name):
     df = clean_dupl(df, f'{df_name}')
     df = clean_miss(df,f'{df_name}')
     df = detect_outliers(df, f'{df_name}')
-    
+
+    ## err laczenia w jedno
+    df = df[df['err'] != 'bad chunk line: not a number']
+    replace_dict = {
+        'timeout reading chunk: state 5 linelen 0 lineoffset 0': 'timeout reading',
+        'timeout reading status': 'timeout reading',
+        'timeout reading chunk: state 6 linelen 0 lineoffset 0': 'timeout reading'
+    }
+    df.loc[:, 'err'] = df['err'].replace(replace_dict)
+    df.loc[:, 'err'] = df['err'].replace(['connect: Network is unreachable'], 'connect: Network unreachable')
+
     df.to_csv(file_path, index = False)
     return df

@@ -101,7 +101,7 @@ models_clas = (DecisionTreeClassifier(random_state = 42, max_depth=10),
 
 )
 
-def prediction_classification(model, data, columns_feature, target, dataset_name, predictors):
+def prediction_classification(model, data, columns_feature, target, dataset_name, predictors=None):
         directory = 'evaluation'
         if not os.path.exists(directory):
                 os.makedirs(directory)
@@ -146,7 +146,7 @@ def prediction_classification(model, data, columns_feature, target, dataset_name
         cm = confusion_matrix(y_test, y_pred)
 
         print('---------------',type(model).__name__,'------------------')
-        print(X.shape[1])
+        print(X.shape)
         print("Accuracy:", accuracy)
         print("Precision:", precision)
         print("Recall:", recall)
@@ -155,14 +155,22 @@ def prediction_classification(model, data, columns_feature, target, dataset_name
         
         #Plot the confusion matrix
 #...
-        plt.figure(figsize=(10,8))
-        sns.set(font_scale = 1.4)
-        sns.heatmap(cm, annot=True, annot_kws={"size":16}, cmap = 'Blues',fmt='g')
+        labels=['connect: Connection refused',
+                                                'connect: Host is unreachable',
+                                                'connect: Network unreachable',
+                                                'connect: No route to host',
+                                                'connect: timeout',
+                                                'no_error',
+                                                'timeout reading']
+        plt.figure(figsize=(14, 12))
+        sns.set(font_scale=1.4)
+        sns.heatmap(cm, annot=True, annot_kws={"size": 12}, cmap='Blues', fmt='g')
         plt.xlabel('Predicted')
         plt.ylabel('True')
         plt.title('Confusion Matrix')
-        plt.xticks(ticks=[0,1,2], labels=['o2', 'telekom', 'vodafone'])
-        plt.yticks(ticks=[0,1,2], labels=['o2', 'telekom', 'vodafone'])
+        plt.xticks(ticks=np.arange(len(labels)), labels=labels, rotation=60)
+        plt.yticks(ticks=np.arange(len(labels)), labels=labels, rotation=0)
+        plt.tight_layout()
         plt.savefig(file_path_ev2)
 
         #plot ROC curve
@@ -176,7 +184,7 @@ def prediction_classification(model, data, columns_feature, target, dataset_name
                 roc_auc[i]= auc(fpr[i], tpr[i])
 
         plt.figure(figsize=(8,6))
-        colors = ['blue', 'red', 'green']  # specify colors for each class
+        colors = ['blue', 'red', 'green', 'orange', 'purple', 'yellow', 'cyan']
         for i, color in zip(range(n_classes), colors):
                 plt.plot(fpr[i], tpr[i], color=color, lw=2,
                         label='ROC curve of class {0} (area = {1:0.2f})'
@@ -194,15 +202,13 @@ def prediction_classification(model, data, columns_feature, target, dataset_name
 
 
 #-------------------------------------------------------------------------------------------------
-def predict(downloads, uploads, merged):
-        # _predictors = ['speed','rsrq','rsrp','rssi','earfcn']#,'proces_DorU']
+def predict(df):
+        # _predictors = ['bsize','uri','from','stored_timestamp','lts']
+
+        # prediction_regression(models_reg[0], df, ['mver','result','dst_addr','src_addr','method', 'uri', 'msm_name','type','from','timestamp'],'lts','network_logs')
 
 
-        prediction_regression(models_reg[0], downloads, ['mobiProv_name', 'mcs0', 'mcs1'],'throughput','downloads')
-        prediction_regression(models_reg[0], uploads, ['mobiProv_name'],'tp_cleaned' ,'uploads')
-        prediction_regression(models_reg[0], merged,['mcs', 'mobiProv_name' , 'proces_DorU'],'throughput','merged')
+        prediction_classification(models_clas[2], df, [
+                'mver','dst_addr','src_addr','ver','method', 'uri',
+         'msm_name','type','from','timestamp'],'err','network_logs')
 
-
-        # prediction_classification(models_clas[0], downloads, ['mcs0', 'mcs1'],'mobiProv_name','downloads')
-        # prediction_classification(models_clas[0], uploads, [],'mobiProv_name' ,'uploads')
-        # prediction_classification(models_clas[0], merged,['mcs',  'proces_DorU'],'mobiProv_name','merged')
