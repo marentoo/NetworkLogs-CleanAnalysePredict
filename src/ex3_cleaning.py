@@ -31,18 +31,18 @@ def clean_miss(df, df_name):
     df['err'].fillna('no_error', inplace = True)
 
     #I approach - droping
-    # df.dropna(subset = ['rt'], inplace = True)
-    # df.dropna(subset = ['from'], inplace = True)
-    # df.dropna(subset = ['mver'], inplace = True)
+    df.dropna(subset = ['rt'], inplace = True)
+    df.dropna(subset = ['from'], inplace = True)
+    df.dropna(subset = ['mver'], inplace = True)
     
     #II approach - imputating
-    df['ver'] = df['ver'].fillna('NaN')
-    df['mver'] = df['mver'].fillna('NaN')
-    df['rt'] = df['rt'].fillna(0).astype(float)
-    df['res'] = df['res'].fillna(0).astype(int)
-    df['hsize'] = df['hsize'].fillna(0).astype(int)
-    df['bsize'] = df['bsize'].fillna(0).astype(int)
-    df['src_addr'] = df['src_addr'].fillna('NaN')
+    # df['ver'] = df['ver'].fillna('NaN')
+    # df['mver'] = df['mver'].fillna('NaN')
+    # df['rt'] = df['rt'].fillna(0).astype(float)
+    # df['res'] = df['res'].fillna(0).astype(int)
+    # df['hsize'] = df['hsize'].fillna(0).astype(int)
+    # df['bsize'] = df['bsize'].fillna(0).astype(int)
+    # df['src_addr'] = df['src_addr'].fillna('NaN')
     
     print('Handling missing data!!!',"\n")
 
@@ -53,22 +53,23 @@ def clean_miss(df, df_name):
         ##Detect outliers -  Define z_score for checking outliers and Percentage of outliers in whole dataset:
 def detect_outliers(df, df_name):
     z_scores = np.abs((df - df.mean(numeric_only=True)) / df.std(numeric_only=True))
-    outliers = df[(z_scores > 5).any(axis=1)]
+    outliers = df[(z_scores > 4).any(axis=1)]
     print(f'No. of outliers - {df_name}: {len(outliers.index)}')
     percout = int((len(outliers.index)*100)/len(df.index))
     print(f' outliers percentage- {df_name}: {percout} %\n')
 
     # Print the attributes considered for outlier detection
-    attributes = z_scores.columns[(z_scores > 5).any(axis=0)]
+    attributes = z_scores.columns[(z_scores > 4).any(axis=0)]
     print('Attributes considered for outlier detection:')
     print(attributes)
 
-    # #Handling outliers
-    # df = df.drop(outliers.index)  # Drop the rows with outliers
-    # outliers.to_csv('analysis/outliers_dropped.csv', index=False)  # Save the cleaned DataFrame to a CSV file
+    ##Handling outliers
+    ## I approach
+    df = df.drop(outliers.index)  # Drop the rows with outliers
+    outliers.to_csv('analysis/outliers_dropped.csv', index=False)  # Save the cleaned DataFrame to a CSV file
 
-    # print("Dropping outliers!\n")
-    # print(f'Remaining rows: {len(df.index)}')
+    print("Dropping outliers!\n")
+    print(f'Remaining rows: {len(df.index)}')
     return df
 
 #------------------------------------------------------------------------------------
@@ -85,14 +86,14 @@ def clean_df(df, df_name):
     df = detect_outliers(df, f'{df_name}')
 
     ## err laczenia w jedno
-    df = df[df['err'] != 'bad chunk line: not a number']
-    replace_dict = {
-        'timeout reading chunk: state 5 linelen 0 lineoffset 0': 'timeout reading',
-        'timeout reading status': 'timeout reading',
-        'timeout reading chunk: state 6 linelen 0 lineoffset 0': 'timeout reading'
-    }
-    df.loc[:, 'err'] = df['err'].replace(replace_dict)
-    df.loc[:, 'err'] = df['err'].replace(['connect: Network is unreachable'], 'connect: Network unreachable')
+    # df = df[df['err'] != 'bad chunk line: not a number']
+    # replace_dict = {
+    #     'timeout reading chunk: state 5 linelen 0 lineoffset 0': 'timeout reading',
+    #     'timeout reading status': 'timeout reading',
+    #     'timeout reading chunk: state 6 linelen 0 lineoffset 0': 'timeout reading'
+    # }
+    # df.loc[:, 'err'] = df['err'].replace(replace_dict)
+    # df.loc[:, 'err'] = df['err'].replace(['connect: Network is unreachable'], 'connect: Network unreachable')
 
     df.to_csv(file_path, index = False)
     return df
