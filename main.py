@@ -23,7 +23,7 @@ def main():
     df_cleaned_network_logs = clean_df(df_network_logs, 'networkdata')
         
         ##PreScaling Analysis - boxplots, histograms, conf matrix... note: there are columns as parameters for boxplot - col 1 col 2
-    analyze(df_cleaned_network_logs,'networkdata',  col1=['bsize'], col2=['rt'])
+    analyze(df_cleaned_network_logs,'networkdata',  col1=['bsize'], col2=['stored_timestamp'])
         
         ##Scaling data frames by chosen scaling technique
     df_scaled_network_logs = scaling_data(df_cleaned_network_logs,'network_logs', scaler_norm)

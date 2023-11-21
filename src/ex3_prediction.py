@@ -203,12 +203,23 @@ def prediction_classification(model, data, columns_feature, target, dataset_name
 
 #-------------------------------------------------------------------------------------------------
 def predict(df):
-        # _predictors = ['bsize','uri','from','stored_timestamp','lts']
+        ## comment section you want to use and uncomment section that you dont
+        ## specify _predictors for smaller number of attributes and change also attributes for one hot encoding
+        ## models_reg or models_clas select number of model in brackets 
 
-        # prediction_regression(models_reg[0], df, ['mver','result','dst_addr','src_addr','method', 'uri', 'msm_name','type','from','timestamp'],'lts','network_logs')
+        _predictors = ['bsize','uri','from','prb_id','stored_timestamp']
+        # _predictors = ['bsize','mver','ver', 'err','dst_addr','src_addr',
+        #                                         'method', 'uri', 'msm_name','type','from',
+        #                                         'af','rt','res','hsize','fw','msm_id',
+        #                                         'prb_id','group_id','timestamp','stored_timestamp']
 
+        # prediction_regression(models_reg[0], df, ['mver','ver', 'err','dst_addr','src_addr',
+        #                                         'method', 'uri', 'msm_name','type','from'],'lts','network_logs',_predictors)
+        prediction_regression(models_reg[0], df, ['uri','from'],'lts','network_logs',_predictors)
 
-        prediction_classification(models_clas[2], df, [
-                'mver','dst_addr','src_addr','ver','method', 'uri',
-         'msm_name','type','from','timestamp'],'err','network_logs')
+        
+        # prediction_classification(models_clas[1], df, [
+        #         'mver','dst_addr','src_addr','ver','method', 'uri',
+        #  'msm_name','type','from','timestamp'],'err','network_logs')
 
+        # prediction_classification(models_clas[1], df, ['uri', 'from'],'err','network_logs', _predictors)
